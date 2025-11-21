@@ -73,14 +73,15 @@ class GateAudioEngine {
         }
     }
 
-    /// Trigger a gate signal on specified channels
-    func triggerGate(channels: [Int], duration: TimeInterval = 0.1) {
+    /// Trigger a gate signal on specified channels (10ms pulse, noise-compatible)
+    func triggerGate(channels: [Int]) {
         guard let player = playerNode, let format = format else {
             print("⚠️ Audio engine not initialized")
             return
         }
 
         let sampleRate = format.sampleRate
+        let duration: TimeInterval = 0.01  // 10ms gate pulse (standard for noise/modular)
         let frameCount = AVAudioFrameCount(duration * sampleRate)
 
         guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frameCount) else {
@@ -112,7 +113,7 @@ class GateAudioEngine {
         // Schedule and play the buffer
         player.scheduleBuffer(buffer, completionHandler: nil)
 
-        print("🎵 Gate triggered on channels: \(channels) for \(duration * 1000)ms")
+        print("🎵 Gate triggered on channels: \(channels) (10ms pulse)")
     }
 
     /// Stop the audio engine

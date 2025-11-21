@@ -59,6 +59,6 @@ class ChannelConfigurationManager: ObservableObject {
         }
 
         // Trigger the gate
-        audioEngine?.triggerGate(channels: activeChannels, duration: 0.1)
+        audioEngine?.triggerGate(channels: activeChannels)
     }
 }
