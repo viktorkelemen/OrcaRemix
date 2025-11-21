@@ -56,21 +56,27 @@ final class AudioDeviceManagerTests: XCTestCase {
         // Given: Enumerated devices
         let devices = AudioDeviceManager.getOutputDevices()
 
-        // When: We look for Expert Sleepers ES-8
-        let es8Device = devices.first {
+        // When: We look for Expert Sleepers devices
+        let expertSleepersDevice = devices.first {
             $0.name.contains("ES-8") || $0.name.contains("Expert Sleepers")
         }
 
-        // Then: If ES-8 is connected, verify it has 8 channels
-        if let es8 = es8Device {
-            XCTAssertEqual(
-                es8.outputChannels,
-                8,
-                "Expert Sleepers ES-8 should have 8 output channels, got \(es8.outputChannels)"
+        // Then: If Expert Sleepers device is connected, verify it has reasonable channel count
+        if let device = expertSleepersDevice {
+            // Expert Sleepers makes various products: ES-3/ES-6/ES-8 (8ch), ES-9 (16ch), etc.
+            XCTAssertGreaterThanOrEqual(
+                device.outputChannels,
+                6,
+                "Expert Sleepers device should have at least 6 channels"
             )
-            print("✅ Found Expert Sleepers ES-8: \(es8.name) with \(es8.outputChannels) channels")
+            XCTAssertLessThanOrEqual(
+                device.outputChannels,
+                16,
+                "Expert Sleepers device should have at most 16 channels"
+            )
+            print("✅ Found Expert Sleepers device: \(device.name) with \(device.outputChannels) channels")
         } else {
-            print("ℹ️  Expert Sleepers ES-8 not connected - skipping multi-channel test")
+            print("ℹ️  Expert Sleepers device not connected - skipping multi-channel test")
             print("   Available devices: \(devices.map { "\($0.name) (\($0.outputChannels)ch)" })")
         }
     }
