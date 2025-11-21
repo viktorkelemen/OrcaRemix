@@ -73,7 +73,7 @@ class GateAudioEngine {
         }
     }
 
-    /// Trigger a gate signal on specified channels (10ms pulse, noise-compatible)
+    /// Trigger a gate signal on specified channels (Make Noise compatible)
     func triggerGate(channels: [Int]) {
         guard let player = playerNode, let format = format else {
             print("⚠️ Audio engine not initialized")
@@ -81,7 +81,7 @@ class GateAudioEngine {
         }
 
         let sampleRate = format.sampleRate
-        let duration: TimeInterval = 0.01  // 10ms gate pulse (standard for noise/modular)
+        let duration: TimeInterval = 0.01  // 10ms gate pulse
         let frameCount = AVAudioFrameCount(duration * sampleRate)
 
         guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frameCount) else {
@@ -91,8 +91,8 @@ class GateAudioEngine {
 
         buffer.frameLength = frameCount
 
-        // Generate gate signal (5V represented as maximum amplitude)
-        // In digital audio, max amplitude = 1.0
+        // Generate gate signal compatible with Make Noise and Expert Sleepers
+        // Gate HIGH = 0.8 (not 1.0) per Make Noise/modular standards
         if let channelData = buffer.floatChannelData {
             let channelCount = Int(format.channelCount)
 
@@ -100,8 +100,8 @@ class GateAudioEngine {
                 for channel in 0..<channelCount {
                     // Channel numbers are 1-based, array is 0-based
                     if channels.contains(channel + 1) {
-                        // Gate HIGH (5V = max amplitude)
-                        channelData[channel][frame] = 1.0
+                        // Gate HIGH = 0.8 (Make Noise compatible)
+                        channelData[channel][frame] = 0.8
                     } else {
                         // Gate LOW (0V)
                         channelData[channel][frame] = 0.0
@@ -113,7 +113,7 @@ class GateAudioEngine {
         // Schedule and play the buffer
         player.scheduleBuffer(buffer, completionHandler: nil)
 
-        print("🎵 Gate triggered on channels: \(channels) (10ms pulse)")
+        print("🎵 Gate triggered on channels: \(channels) (10ms @ 0.8V)")
     }
 
     /// Stop the audio engine
