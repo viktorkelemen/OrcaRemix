@@ -1,9 +1,14 @@
 import Foundation
 import CoreAudio
 import AVFoundation
+import Combine
 
 /// Manages audio device detection and configuration
 class AudioDeviceManager {
+
+    // MARK: - Publishers
+    static let devicesChanged = PassthroughSubject<Void, Never>()
+
 
     // MARK: - Device Information
 
@@ -169,5 +174,93 @@ class AudioDeviceManager {
         )
 
         return result == noErr
+    }
+
+    /// Get the current system default output device ID
+    static func getSystemDefaultOutputDeviceID() -> AudioDeviceID? {
+        var propertyAddress = AudioObjectPropertyAddress(
+            mSelector: kAudioHardwarePropertyDefaultOutputDevice,
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
+
+        var deviceID: AudioDeviceID = kAudioDeviceUnknown
+        var dataSize = UInt32(MemoryLayout<AudioDeviceID>.size)
+
+        let result = AudioObjectGetPropertyData(
+            AudioObjectID(kAudioObjectSystemObject),
+            &propertyAddress,
+            0,
+            nil,
+            &dataSize,
+            &deviceID
+        )
+
+        return result == noErr ? deviceID : nil
+    }
+
+    // MARK: - Listeners
+
+    private static var isListening = false
+
+    private static let propertyListener: AudioObjectPropertyListenerBlock = { _, _ in
+        DispatchQueue.main.async {
+            devicesChanged.send()
+        }
+    }
+
+    static func startListening() {
+        guard !isListening else { return }
+
+        var propertyAddress = AudioObjectPropertyAddress(
+            mSelector: kAudioHardwarePropertyDevices,
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
+
+        AudioObjectAddPropertyListenerBlock(
+            AudioObjectID(kAudioObjectSystemObject),
+            &propertyAddress,
+            nil,
+            propertyListener
+        )
+
+        // Also listen for default device changes
+        propertyAddress.mSelector = kAudioHardwarePropertyDefaultOutputDevice
+        AudioObjectAddPropertyListenerBlock(
+            AudioObjectID(kAudioObjectSystemObject),
+            &propertyAddress,
+            nil,
+            propertyListener
+        )
+
+        isListening = true
+    }
+
+    static func stopListening() {
+        guard isListening else { return }
+
+        var propertyAddress = AudioObjectPropertyAddress(
+            mSelector: kAudioHardwarePropertyDevices,
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
+
+        AudioObjectRemovePropertyListenerBlock(
+            AudioObjectID(kAudioObjectSystemObject),
+            &propertyAddress,
+            nil,
+            propertyListener
+        )
+
+        propertyAddress.mSelector = kAudioHardwarePropertyDefaultOutputDevice
+        AudioObjectRemovePropertyListenerBlock(
+            AudioObjectID(kAudioObjectSystemObject),
+            &propertyAddress,
+            nil,
+            propertyListener
+        )
+
+        isListening = false
     }
 }
