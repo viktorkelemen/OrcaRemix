@@ -2,16 +2,19 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var audioDeviceViewModel = AudioDeviceViewModel()
+    @StateObject private var channelConfigManager = ChannelConfigurationManager()
 
     var body: some View {
         VStack(spacing: 20) {
-            Text("Hello, World!")
+            Text("OrcaRemix")
                 .font(.largeTitle)
                 .padding()
 
             deviceSelectionView
+
+            ChannelRoutingView(configManager: channelConfigManager)
         }
-        .frame(minWidth: 500, minHeight: 400)
+        .frame(minWidth: 600, minHeight: 700)
         .padding()
     }
 
