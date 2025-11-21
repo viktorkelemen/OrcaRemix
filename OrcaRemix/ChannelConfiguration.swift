@@ -18,9 +18,9 @@ class ChannelConfigurationManager: ObservableObject {
     @Published var channels: [ChannelConfiguration]
 
     init() {
-        // Initialize 8 channels, all set to None
+        // Initialize 8 channels, channel 2 defaults to Gate
         self.channels = (1...8).map { channelNumber in
-            ChannelConfiguration(id: channelNumber, signal: .none)
+            ChannelConfiguration(id: channelNumber, signal: channelNumber == 2 ? .gate : .none)
         }
     }
 
