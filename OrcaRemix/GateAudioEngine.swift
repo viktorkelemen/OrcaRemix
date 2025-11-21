@@ -11,6 +11,9 @@ class GateAudioEngine {
     func setup(deviceID: AudioDeviceID?) throws {
         audioEngine = AVAudioEngine()
         playerNode = AVAudioPlayerNode()
+        
+        // Reset engine to clear any previous state
+        audioEngine?.reset()
 
         guard let engine = audioEngine, let player = playerNode else {
             throw GateAudioError.engineInitFailed
@@ -29,21 +32,32 @@ class GateAudioEngine {
 
         // Create format matching output
         let outputFormat = outputNode.outputFormat(forBus: 0)
-        format = AVAudioFormat(
-            standardFormatWithSampleRate: outputFormat.sampleRate,
-            channels: outputFormat.channelCount
-        )
+        format = outputFormat
 
         // Connect player to output
         if let format = format {
             engine.connect(player, to: outputNode, format: format)
+        } else {
+            print("⚠️ Failed to create audio format")
+            throw GateAudioError.engineInitFailed
         }
 
         // Start engine
         try engine.start()
-        player.play()
-
-        print("🎛️ Audio engine started: \(outputFormat.sampleRate)Hz, \(outputFormat.channelCount) channels")
+        
+        // Only play if connected
+        if engine.isInManualRenderingMode || engine.isRunning {
+            player.play()
+            print("🎛️ Audio engine started: \(outputFormat.sampleRate)Hz, \(outputFormat.channelCount) channels")
+            
+            // Verify device again after start
+            if let deviceID = deviceID {
+                print("🔍 Verifying device after start...")
+                try setOutputDevice(deviceID: deviceID)
+            }
+        } else {
+            print("⚠️ Audio engine failed to start running")
+        }
     }
 
     /// Set the audio output device
@@ -70,6 +84,27 @@ class GateAudioEngine {
 
         if status != noErr {
             print("⚠️ Failed to set output device: \(status)")
+        } else {
+            // Verify the setting
+            var currentDeviceID: AudioDeviceID = 0
+            var dataSize = UInt32(MemoryLayout<AudioDeviceID>.size)
+            let verifyStatus = AudioUnitGetProperty(
+                audioUnit,
+                kAudioOutputUnitProperty_CurrentDevice,
+                kAudioUnitScope_Global,
+                0,
+                &currentDeviceID,
+                &dataSize
+            )
+            
+            if verifyStatus == noErr {
+                print("✅ Output device set to ID: \(deviceID). Verified: \(currentDeviceID)")
+                if deviceID != currentDeviceID {
+                    print("⚠️ WARNING: Device ID mismatch! Requested: \(deviceID), Actual: \(currentDeviceID)")
+                }
+            } else {
+                print("⚠️ Failed to verify output device: \(verifyStatus)")
+            }
         }
     }
 
@@ -121,6 +156,10 @@ class GateAudioEngine {
         playerNode?.stop()
         audioEngine?.stop()
         print("🛑 Audio engine stopped")
+    }
+
+    deinit {
+        stop()
     }
 
     enum GateAudioError: Error {

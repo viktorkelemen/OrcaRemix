@@ -18,7 +18,13 @@ struct ContentView: View {
         .padding()
         .onChange(of: audioDeviceViewModel.selectedDevice) { newDevice in
             // Update audio engine when device changes
-            channelConfigManager.selectedDeviceID = newDevice?.id
+            channelConfigManager.setupAudioEngine(deviceID: newDevice?.id)
+        }
+        .onAppear {
+            // Sync initial device selection
+            if let device = audioDeviceViewModel.selectedDevice {
+                channelConfigManager.setupAudioEngine(deviceID: device.id)
+            }
         }
     }
 

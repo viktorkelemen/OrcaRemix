@@ -36,12 +36,17 @@ class ChannelConfigurationManager: ObservableObject {
 
     /// Setup audio engine with selected device
     func setupAudioEngine(deviceID: AudioDeviceID?) {
+        // Stop existing engine first
+        audioEngine?.stop()
+        
         selectedDeviceID = deviceID
-        audioEngine = GateAudioEngine()
+        let newEngine = GateAudioEngine()
         do {
-            try audioEngine?.setup(deviceID: deviceID)
+            try newEngine.setup(deviceID: deviceID)
+            self.audioEngine = newEngine
         } catch {
             print("⚠️ Failed to setup audio engine: \(error)")
+            self.audioEngine = nil
         }
     }
 
