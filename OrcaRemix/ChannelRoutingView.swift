@@ -17,13 +17,14 @@ struct ChannelRoutingView: View {
                             .frame(width: 80, alignment: .leading)
                             .foregroundColor(.primary)
 
-                        Picker("Signal", selection: $channel.signal) {
+                        Picker("", selection: $channel.signal) {
                             ForEach(ChannelConfiguration.SignalType.allCases) { signalType in
                                 Text(signalType.rawValue)
                                     .tag(signalType)
                             }
                         }
                         .pickerStyle(.menu)
+                        .labelsHidden()
                         .frame(width: 120)
 
                         Spacer()

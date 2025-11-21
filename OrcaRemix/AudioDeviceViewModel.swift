@@ -53,6 +53,5 @@ class AudioDeviceViewModel: ObservableObject {
 
     func selectDevice(_ device: AudioDeviceManager.DeviceInfo) {
         selectedDevice = device
-        _ = AudioDeviceManager.setSystemDefaultDevice(deviceID: device.id)
     }
 }
