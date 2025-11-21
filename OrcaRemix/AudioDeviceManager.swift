@@ -72,7 +72,7 @@ class AudioDeviceManager {
 
     // MARK: - Device Properties
 
-    private static func getDeviceName(_ deviceID: AudioDeviceID) -> String? {
+    internal static func getDeviceName(_ deviceID: AudioDeviceID) -> String? {
         var propertyAddress = AudioObjectPropertyAddress(
             mSelector: kAudioDevicePropertyDeviceNameCFString,
             mScope: kAudioObjectPropertyScopeGlobal,
@@ -100,7 +100,7 @@ class AudioDeviceManager {
         return name as String
     }
 
-    private static func getOutputChannelCount(_ deviceID: AudioDeviceID) -> Int? {
+    internal static func getOutputChannelCount(_ deviceID: AudioDeviceID) -> Int? {
         var propertyAddress = AudioObjectPropertyAddress(
             mSelector: kAudioDevicePropertyStreamConfiguration,
             mScope: kAudioDevicePropertyScopeOutput,
@@ -118,7 +118,12 @@ class AudioDeviceManager {
             return nil
         }
 
-        let bufferListPointer = UnsafeMutablePointer<AudioBufferList>.allocate(capacity: 1)
+        // Allocate raw bytes based on the actual size CoreAudio needs
+        // This is critical for devices with multiple buffers (e.g., Expert Sleepers ES-8)
+        let bufferListPointer = UnsafeMutableRawPointer.allocate(
+            byteCount: Int(dataSize),
+            alignment: MemoryLayout<AudioBufferList>.alignment
+        )
         defer { bufferListPointer.deallocate() }
 
         guard AudioObjectGetPropertyData(
@@ -132,7 +137,10 @@ class AudioDeviceManager {
             return nil
         }
 
-        let bufferList = UnsafeMutableAudioBufferListPointer(bufferListPointer)
+        // Cast raw memory to typed pointer
+        let bufferList = UnsafeMutableAudioBufferListPointer(
+            UnsafeMutablePointer<AudioBufferList>(OpaquePointer(bufferListPointer))
+        )
         var totalChannels = 0
 
         for buffer in bufferList {
