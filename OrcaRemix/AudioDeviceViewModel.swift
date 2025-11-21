@@ -26,10 +26,15 @@ class AudioDeviceViewModel: ObservableObject {
     func refreshDevices() {
         availableDevices = AudioDeviceManager.getOutputDevices()
 
+        // Clear stale selection if device was unplugged
+        if let selected = selectedDevice,
+           !availableDevices.contains(where: { $0.id == selected.id }) {
+            selectedDevice = nil
+        }
+
         // 1. Try to find ES-8
         if let es8 = availableDevices.first(where: { $0.name.contains("ES-8") }) {
             selectedDevice = es8
-            _ = AudioDeviceManager.setSystemDefaultDevice(deviceID: es8.id)
             return
         }
 
