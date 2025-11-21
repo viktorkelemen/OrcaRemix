@@ -14,6 +14,7 @@
 		A1000018000000000000001 /* AudioDeviceViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000019000000000000001 /* AudioDeviceViewModel.swift */; };
 		A100001A000000000000001 /* ChannelConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100001B000000000000001 /* ChannelConfiguration.swift */; };
 		A100001C000000000000001 /* ChannelRoutingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100001D000000000000001 /* ChannelRoutingView.swift */; };
+		A100001E000000000000001 /* GateAudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100001F000000000000001 /* GateAudioEngine.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,6 +26,7 @@
 		A1000019000000000000001 /* AudioDeviceViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioDeviceViewModel.swift; sourceTree = "<group>"; };
 		A100001B000000000000001 /* ChannelConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelConfiguration.swift; sourceTree = "<group>"; };
 		A100001D000000000000001 /* ChannelRoutingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelRoutingView.swift; sourceTree = "<group>"; };
+		A100001F000000000000001 /* GateAudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GateAudioEngine.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -55,6 +57,7 @@
 				A1000019000000000000001 /* AudioDeviceViewModel.swift */,
 				A100001B000000000000001 /* ChannelConfiguration.swift */,
 				A100001D000000000000001 /* ChannelRoutingView.swift */,
+				A100001F000000000000001 /* GateAudioEngine.swift */,
 				A1000006000000000000001 /* Assets.xcassets */,
 			);
 			path = OrcaRemix;
@@ -138,6 +141,7 @@
 				A1000018000000000000001 /* AudioDeviceViewModel.swift in Sources */,
 				A100001A000000000000001 /* ChannelConfiguration.swift in Sources */,
 				A100001C000000000000001 /* ChannelRoutingView.swift in Sources */,
+				A100001E000000000000001 /* GateAudioEngine.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

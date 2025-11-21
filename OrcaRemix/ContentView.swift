@@ -16,6 +16,10 @@ struct ContentView: View {
         }
         .frame(minWidth: 600, minHeight: 700)
         .padding()
+        .onChange(of: audioDeviceViewModel.selectedDevice) { newDevice in
+            // Update audio engine when device changes
+            channelConfigManager.selectedDeviceID = newDevice?.id
+        }
     }
 
     private var deviceSelectionView: some View {

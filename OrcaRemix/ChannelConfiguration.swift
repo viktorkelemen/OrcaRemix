@@ -1,4 +1,5 @@
 import Foundation
+import CoreAudio
 
 /// Configuration for a single output channel
 struct ChannelConfiguration: Identifiable {
@@ -16,6 +17,8 @@ struct ChannelConfiguration: Identifiable {
 /// Manages all 8 channel configurations
 class ChannelConfigurationManager: ObservableObject {
     @Published var channels: [ChannelConfiguration]
+    private var audioEngine: GateAudioEngine?
+    var selectedDeviceID: AudioDeviceID?
 
     init() {
         // Initialize 8 channels, channel 2 defaults to Gate
@@ -31,6 +34,17 @@ class ChannelConfigurationManager: ObservableObject {
             .map { $0.id }
     }
 
+    /// Setup audio engine with selected device
+    func setupAudioEngine(deviceID: AudioDeviceID?) {
+        selectedDeviceID = deviceID
+        audioEngine = GateAudioEngine()
+        do {
+            try audioEngine?.setup(deviceID: deviceID)
+        } catch {
+            print("⚠️ Failed to setup audio engine: \(error)")
+        }
+    }
+
     /// Trigger gate signal to configured channels
     func triggerGate() {
         let activeChannels = gateChannels()
@@ -39,7 +53,12 @@ class ChannelConfigurationManager: ObservableObject {
             return
         }
 
-        print("🎵 Triggering Gate on channels: \(activeChannels)")
-        // TODO: Send actual gate signal to audio device
+        // Setup audio engine if needed
+        if audioEngine == nil {
+            setupAudioEngine(deviceID: selectedDeviceID)
+        }
+
+        // Trigger the gate
+        audioEngine?.triggerGate(channels: activeChannels, duration: 0.1)
     }
 }
